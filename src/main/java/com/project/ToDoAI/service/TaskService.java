@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final AiSuggestionService openAiService;
+//    private final AiSuggestionService openAiService;
+    private final GroqAiService groqAiService;
 
     public TaskResponse createTask(TaskRequest request, User user) {
         Task task = new Task();
@@ -30,9 +31,7 @@ public class TaskService {
         task.setCreatedAt(java.time.LocalDateTime.now());
         task.setUser(user);
 
-        System.out.println(task);
         Task saved = taskRepository.save(task);
-        System.out.println(saved);
         return mapToResponse(saved);
     }
 
@@ -66,9 +65,8 @@ public class TaskService {
         String taskSummary = tasks.stream().map(task -> "- " + task.getTitle() + " (" + task.getStatus() + ")")
                 .collect(Collectors.joining("\n"));
 
-        String suggestion = openAiService.getTaskSuggestion(taskSummary);
-        System.out.println(suggestion);
-        return suggestion;
+//        String suggestion = openAiService.getTaskSuggestion(taskSummary);
+        return groqAiService.getTaskSuggestion(taskSummary);
     }
 
     private TaskResponse mapToResponse(Task task) {
