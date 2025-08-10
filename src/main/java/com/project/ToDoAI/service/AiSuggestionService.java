@@ -13,6 +13,10 @@ public class AiSuggestionService {
 
     @Value("${app.useMockAi}") // configurable via application.properties
     private boolean useMockAi;
+    @Value("${openai.api.key}")
+    private String apiKey;
+    @Value("${openai.api.model}")
+    private String gptModel;
 
     private final OpenAiService openAiClient;
 
@@ -22,8 +26,11 @@ public class AiSuggestionService {
             return mockResponse(taskSummary);
 
         CompletionRequest request = CompletionRequest.builder()
-                .model("gpt-3.5-turbo")
-                .prompt("Here is a list of tasks:\n" + taskSummary + "\n\nBased on their status and urgency, what task should the user do next? Respond with one helpful sentence.")
+                .model(gptModel)
+                .prompt("Here is a list of tasks:\n"
+                        + taskSummary +
+                        "\n\nBased on their status and urgency, suggest next 5 task should the user do next? " +
+                        "Response in JSON format with fields: title, description, status, priority, and due date.")
                 .maxTokens(60)
                 .temperature(0.7)
                 .build();
@@ -32,9 +39,9 @@ public class AiSuggestionService {
             return openAiClient.createCompletion(request).getChoices().get(0).getText().trim();
         } catch (OpenAiHttpException e) {
             if (e.statusCode == 429) {
-                throw new RuntimeException("Unable to fetch AI suggestion due to quota limits. Try writing a simple CRUD operation.");
+                throw new RuntimeException("Quota limits reached. Try a simpler request.");
             }
-            throw new RuntimeException("Something went Wrong with openAI!!!");
+            throw new RuntimeException(e.getMessage());
         }
     }
 

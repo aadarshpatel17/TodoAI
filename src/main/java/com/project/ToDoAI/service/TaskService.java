@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-//    private final AiSuggestionService openAiService;
-    private final GroqAiService groqAiService;
+    private final AiSuggestionService openAiService;
+//    private final GroqAiService groqAiService;
 
     public TaskResponse createTask(TaskRequest request, User user) {
         Task task = new Task();
@@ -65,8 +65,8 @@ public class TaskService {
         String taskSummary = tasks.stream().map(task -> "- " + task.getTitle() + " (" + task.getStatus() + ")")
                 .collect(Collectors.joining("\n"));
 
-//        String suggestion = openAiService.getTaskSuggestion(taskSummary);
-        return groqAiService.getTaskSuggestion(taskSummary);
+        return openAiService.getTaskSuggestion(taskSummary);
+//        return groqAiService.getTaskSuggestion(taskSummary);
     }
 
     private TaskResponse mapToResponse(Task task) {
